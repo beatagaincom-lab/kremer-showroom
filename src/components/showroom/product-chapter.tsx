@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import type { CSSProperties } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { Bookmark, Eye, Minus } from "lucide-react";
+import { motion } from "motion/react";
+import { Bookmark, Eye, MessageCircle, Minus } from "lucide-react";
 import type { Product, Variant } from "@/types/catalog";
 
 type ProductChapterProps = {
@@ -14,9 +14,11 @@ type ProductChapterProps = {
   isSaved: boolean;
   showPrices: boolean;
   materialEnabled: boolean;
+  commentCount: number;
   onVariantChange: (variantId: string) => void;
   onToggleSelection: () => void;
   onOpenMaterial: (variant: Variant) => void;
+  onOpenComments: () => void;
 };
 
 export function ProductChapter({
@@ -27,9 +29,11 @@ export function ProductChapter({
   isSaved,
   showPrices,
   materialEnabled,
+  commentCount,
   onVariantChange,
   onToggleSelection,
   onOpenMaterial,
+  onOpenComments,
 }: ProductChapterProps) {
   const variant = product.variants.find((entry) => entry.id === selectedVariantId) ?? product.variants[0];
   const productNumber = String(index + 1).padStart(2, "0");
@@ -44,25 +48,22 @@ export function ProductChapter({
 
       <div className="grid lg:grid-cols-[53%_47%]">
         <div className="relative min-h-[52svh] overflow-hidden bg-surface lg:sticky lg:top-[72px] lg:h-[calc(100svh-72px)]">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={variant.id}
-              initial={{ opacity: 0.15, scale: 1.008 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0.15 }}
-              transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute inset-0"
-            >
-              <Image
-                src={variant.productImages[0].src}
-                alt={variant.productImages[0].alt}
-                fill
-                sizes="(max-width: 1024px) 100vw, 53vw"
-                className="object-cover"
-                style={{ filter: variant.imageFilter }}
-              />
-            </motion.div>
-          </AnimatePresence>
+          <motion.div
+            key={variant.id}
+            initial={{ opacity: 0.15, scale: 1.008 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0"
+          >
+            <Image
+              src={variant.productImages[0].src}
+              alt={variant.productImages[0].alt}
+              fill
+              sizes="(max-width: 1024px) 100vw, 53vw"
+              className="object-cover"
+              style={{ filter: variant.imageFilter }}
+            />
+          </motion.div>
           <div className="absolute bottom-0 left-0 bg-white px-5 py-3 text-xs text-muted">
             Abbildung: Demo · {variant.colorName}
           </div>
@@ -119,7 +120,7 @@ export function ProductChapter({
                 })}
               </div>
 
-              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <button type="button" className={isSaved ? "button-secondary" : "button-primary"} onClick={onToggleSelection}>
                   {isSaved ? <Minus aria-hidden size={17} /> : <Bookmark aria-hidden size={17} />}
                   {isSaved ? "Aus Auswahl entfernen" : "Variante merken"}
@@ -129,6 +130,10 @@ export function ProductChapter({
                     <Eye aria-hidden size={17} /> Material ansehen
                   </button>
                 ) : null}
+                <button type="button" className="button-quiet" onClick={onOpenComments}>
+                  <MessageCircle aria-hidden size={16} />
+                  {commentCount > 0 ? `Kommentare (${commentCount})` : "Kommentar schreiben"}
+                </button>
               </div>
             </div>
           </div>

@@ -14,7 +14,9 @@ export type FixleintuchGalleryImage = {
 };
 
 export const FIXLEINTUECHER_SLUG = "fixleintuecher-farbkollektion";
-export const URSULA_IMAGE_WORLD_SLUG = "ursula-bildwelt";
+export const IMAGE_WORLD_SLUG = "bildwelt-beispiele";
+/** Alter Link aus früheren Präsentationen; leitet auf IMAGE_WORLD_SLUG um. */
+export const LEGACY_IMAGE_WORLD_SLUG = "ursula-bildwelt";
 
 export const fixleintuchColors: FixleintuchColor[] = [
   { id: "04-hellblau", code: "04", name: "Hellblau", color: "#b8d5ee", family: "blue" },
@@ -59,6 +61,75 @@ export const fixleintuchFamilies = [
   { id: "green" as const, title: "Grüne Reihe", description: "Frische, natürliche Nuancen von Weiss und Hellgrün bis Petrol und Dunkelgrün." },
   { id: "rose" as const, title: "Rosa, Violett und Grau", description: "Sanfte Rosétöne treffen auf Lila, Brombeer und eine präzise Grauskala." },
   { id: "warm" as const, title: "Natur- und warme Farben", description: "Offwhite, Sand und Caramel führen zu Gelb, Rot, Bordeaux und Altrosa." },
+];
+
+export const bildweltGallery: FixleintuchGalleryImage[] = [
+  {
+    src: "/assets/fixleintuecher/beispiele/authentic-studio-textile-catalogue.webp",
+    alt: "Gerollte Fixleintücher in vier harmonischen Farbgruppen auf einem Studiotisch",
+    width: 2528,
+    height: 1696,
+  },
+  {
+    src: "/assets/fixleintuecher/beispiele/catalogue-architectural-loft.webp",
+    alt: "Sortierte Fixleintücher auf einem langen Holztisch in einem hellen Loft",
+    width: 2752,
+    height: 1536,
+  },
+  {
+    src: "/assets/fixleintuecher/beispiele/catalogue-bright-horizon.webp",
+    alt: "Gestapelte Fixleintücher in kräftigen und natürlichen Farbtönen vor hellem Hintergrund",
+    width: 2528,
+    height: 1696,
+  },
+  {
+    src: "/assets/fixleintuecher/beispiele/catalogue-dynamic-top-down.webp",
+    alt: "Fixleintücher in allen Kollektionstönen kreisförmig aus der Vogelperspektive arrangiert",
+    width: 2048,
+    height: 2048,
+  },
+  {
+    src: "/assets/fixleintuecher/beispiele/catalogue-low-angle-majesty.webp",
+    alt: "Dicht gestapelte Fixleintücher aus tiefer Perspektive fotografiert",
+    width: 1792,
+    height: 2400,
+  },
+  {
+    src: "/assets/fixleintuecher/beispiele/catalogue-ordered-symmetry.webp",
+    alt: "Symmetrisch geordnete Fixleintücher in zwanzig Farben",
+    width: 2400,
+    height: 1792,
+  },
+  {
+    src: "/assets/fixleintuecher/beispiele/catalogue-soft-scandi-luxury.webp",
+    alt: "Gerollte Fixleintücher in einer warmen, skandinavisch eingerichteten Umgebung",
+    width: 2528,
+    height: 1696,
+  },
+  {
+    src: "/assets/fixleintuecher/beispiele/definitive-textile-authority-shoot.webp",
+    alt: "Fixleintücher als präzise Farbmatrix vor neutralem Studiohintergrund",
+    width: 2528,
+    height: 1696,
+  },
+  {
+    src: "/assets/fixleintuecher/beispiele/natural-saturation-textile-shoot.webp",
+    alt: "Natürlich beleuchteter Stapel gerollter Fixleintücher in der gesamten Farbpalette",
+    width: 2528,
+    height: 1696,
+  },
+  {
+    src: "/assets/fixleintuecher/beispiele/radically-honest-textile-photography.webp",
+    alt: "Authentisch inszenierte Fixleintücher auf einer gebrauchten Studiofläche",
+    width: 2528,
+    height: 1696,
+  },
+  {
+    src: "/assets/fixleintuecher/beispiele/the-swiss-studio-truth.webp",
+    alt: "Sachlich fotografierte Fixleintücher in klaren Reihen auf Beton",
+    width: 2528,
+    height: 1696,
+  },
 ];
 
 export const fixleintuchGallery: FixleintuchGalleryImage[] = [

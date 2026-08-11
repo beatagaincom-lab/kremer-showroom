@@ -1,9 +1,20 @@
 "use client";
 
 import Image from "next/image";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import Link from "next/link";
+import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { fixleintuchGallery, type FixleintuchGalleryImage } from "@/data/fixleintuecher";
+import { Presence, useLastPresent } from "@/components/presence";
+import { ArrowRight, Mail } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
+import { SiteFooter } from "@/components/site-footer";
+import { contacts } from "@/data/catalog";
+import {
+  FIXLEINTUECHER_SLUG,
+  bildweltGallery,
+  fixleintuchGallery,
+  type FixleintuchGalleryImage,
+} from "@/data/fixleintuecher";
 
 const premiumEase = [0.22, 1, 0.36, 1] as const;
 
@@ -14,76 +25,7 @@ const heroImage: FixleintuchGalleryImage = {
   height: 1024,
 };
 
-const ursulaAdditionalGallery: FixleintuchGalleryImage[] = [
-  {
-    src: "/assets/fixleintuecher/ursula-new/authentic-studio-textile-catalogue.webp",
-    alt: "Gerollte Fixleintücher in vier harmonischen Farbgruppen auf einem Studiotisch",
-    width: 2528,
-    height: 1696,
-  },
-  {
-    src: "/assets/fixleintuecher/ursula-new/catalogue-architectural-loft.webp",
-    alt: "Sortierte Fixleintücher auf einem langen Holztisch in einem hellen Loft",
-    width: 2752,
-    height: 1536,
-  },
-  {
-    src: "/assets/fixleintuecher/ursula-new/catalogue-bright-horizon.webp",
-    alt: "Gestapelte Fixleintücher in kräftigen und natürlichen Farbtönen vor hellem Hintergrund",
-    width: 2528,
-    height: 1696,
-  },
-  {
-    src: "/assets/fixleintuecher/ursula-new/catalogue-dynamic-top-down.webp",
-    alt: "Fixleintücher in allen Kollektionstönen kreisförmig aus der Vogelperspektive arrangiert",
-    width: 2048,
-    height: 2048,
-  },
-  {
-    src: "/assets/fixleintuecher/ursula-new/catalogue-low-angle-majesty.webp",
-    alt: "Dicht gestapelte Fixleintücher aus tiefer Perspektive fotografiert",
-    width: 1792,
-    height: 2400,
-  },
-  {
-    src: "/assets/fixleintuecher/ursula-new/catalogue-ordered-symmetry.webp",
-    alt: "Symmetrisch geordnete Fixleintücher in zwanzig Farben",
-    width: 2400,
-    height: 1792,
-  },
-  {
-    src: "/assets/fixleintuecher/ursula-new/catalogue-soft-scandi-luxury.webp",
-    alt: "Gerollte Fixleintücher in einer warmen, skandinavisch eingerichteten Umgebung",
-    width: 2528,
-    height: 1696,
-  },
-  {
-    src: "/assets/fixleintuecher/ursula-new/definitive-textile-authority-shoot.webp",
-    alt: "Fixleintücher als präzise Farbmatrix vor neutralem Studiohintergrund",
-    width: 2528,
-    height: 1696,
-  },
-  {
-    src: "/assets/fixleintuecher/ursula-new/natural-saturation-textile-shoot.webp",
-    alt: "Natürlich beleuchteter Stapel gerollter Fixleintücher in der gesamten Farbpalette",
-    width: 2528,
-    height: 1696,
-  },
-  {
-    src: "/assets/fixleintuecher/ursula-new/radically-honest-textile-photography.webp",
-    alt: "Authentisch inszenierte Fixleintücher auf einer gebrauchten Studiofläche",
-    width: 2528,
-    height: 1696,
-  },
-  {
-    src: "/assets/fixleintuecher/ursula-new/the-swiss-studio-truth.webp",
-    alt: "Sachlich fotografierte Fixleintücher in klaren Reihen auf Beton",
-    width: 2528,
-    height: 1696,
-  },
-];
-
-const galleryImages = [...ursulaAdditionalGallery, ...fixleintuchGallery];
+const galleryImages = [...bildweltGallery, ...fixleintuchGallery];
 const imageWorld = [heroImage, ...galleryImages];
 
 function CloseIcon() {
@@ -108,11 +50,15 @@ function ArrowIcon({ direction }: { direction: "previous" | "next" }) {
   );
 }
 
-export function UrsulaImageWorld() {
+export function ImageWorld() {
   const reduceMotion = useReducedMotion();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const shownIndex = useLastPresent(activeIndex);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const contact = contacts[0];
+
+  const requestMoreHref = `mailto:${contact.email}?subject=${encodeURIComponent("Weitere Beispiele Bildwelt Fixleintücher")}&body=${encodeURIComponent(`Guten Tag ${contact.name}\n\nGerne würden wir weitere Beispiele der Bildwelt sehen.\n\nFreundliche Grüsse`)}`;
 
   const closeLightbox = () => {
     setActiveIndex(null);
@@ -154,21 +100,42 @@ export function UrsulaImageWorld() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-white">
-      <section className="mx-auto grid min-h-[76svh] w-full max-w-[1540px] items-center gap-14 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-[0.82fr_1.18fr] lg:gap-20 lg:px-14 lg:py-28 xl:gap-28 xl:px-20">
+      <header className="site-gutter flex h-[72px] items-center justify-between border-b border-line">
+        <div className="flex items-center gap-5">
+          <BrandLogo compact priority />
+          <span className="hidden border-l border-line pl-5 text-[12px] font-semibold tracking-[0.18em] text-muted md:block">BILDWELT</span>
+        </div>
+        <Link href={`/showroom/${FIXLEINTUECHER_SLUG}`} className="text-link">
+          Zur Farbkollektion <ArrowRight aria-hidden size={15} />
+        </Link>
+      </header>
+
+      <section className="mx-auto grid w-full max-w-[1540px] items-center gap-14 px-5 py-20 sm:px-8 sm:py-24 lg:min-h-[76svh] lg:grid-cols-[0.82fr_1.18fr] lg:gap-20 lg:px-14 lg:py-28 xl:gap-28 xl:px-20">
         <motion.div
           initial={reduceMotion ? false : { opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.1, ease: premiumEase }}
           className="max-w-[610px]"
         >
-          <h1 className="font-serif text-[clamp(3.25rem,5.8vw,5.8rem)] leading-[0.98] tracking-[-0.055em] text-graphite">
-            Hallo Ursula,
+          <p className="kicker">Bildwelt Fixleintücher</p>
+          <h1 className="mt-7 font-serif text-[clamp(3.25rem,5.8vw,5.8rem)] leading-[0.98] tracking-[-0.055em] text-graphite">
+            Ein paar Beispiele.
             <br />
-            hier ein paar Versionen.
+            <span className="serif-accent">Auf Wunsch mehr.</span>
           </h1>
           <p className="mt-8 max-w-[540px] text-[1.02rem] leading-[1.75] tracking-[-0.015em] text-[#74797d] sm:mt-10 sm:text-[1.12rem]">
-            Eine erste Richtung für die Kollektion – als Ausgangspunkt gedacht. Bildsprache, Aufbau und Wirkung können wir selbstverständlich auch anders entwickeln.
+            Eine erste Richtung für die Bildsprache der Kollektion – als
+            Ausgangspunkt gedacht. Aufbau, Stimmung und Umfang entwickeln wir
+            gerne nach Ihren Vorstellungen weiter.
           </p>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+            <a href={requestMoreHref} className="button-primary">
+              <Mail aria-hidden size={16} /> Weitere Beispiele anfragen
+            </a>
+            <Link href={`/showroom/${FIXLEINTUECHER_SLUG}`} className="button-secondary">
+              Zur Farbkollektion
+            </Link>
+          </div>
         </motion.div>
 
         <motion.button
@@ -220,35 +187,29 @@ export function UrsulaImageWorld() {
             </motion.button>
           ))}
         </div>
+        <div className="mx-auto mt-14 flex w-full max-w-[1540px] flex-col items-start justify-between gap-6 border-t border-line pt-10 sm:flex-row sm:items-center">
+          <p className="max-w-md text-sm leading-7 text-muted">
+            Diese Auswahl ist bewusst kompakt gehalten. Weitere Motive, Formate
+            und Stimmungen zeigen wir gerne auf Anfrage.
+          </p>
+          <a href={requestMoreHref} className="button-secondary shrink-0">
+            <Mail aria-hidden size={16} /> Mehr Beispiele anfragen
+          </a>
+        </div>
       </section>
 
-      <motion.section
-        className="flex min-h-[300px] items-center justify-center bg-graphite px-8 py-24"
-        initial={reduceMotion ? false : { opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true, amount: 0.35 }}
-        transition={{ duration: 1.2, ease: premiumEase }}
-      >
-        <Image
-          src="/assets/brand/b2b-logo.svg"
-          alt="B2B"
-          width={500}
-          height={214}
-          unoptimized
-          className="h-auto w-full max-w-[330px]"
-        />
-      </motion.section>
+      <SiteFooter />
 
-      <AnimatePresence>
-        {activeIndex !== null && (
+      <Presence open={activeIndex !== null}>
+        {shownIndex !== null && (
           <motion.div
             role="dialog"
             aria-modal="true"
-            aria-label={`Vollansicht Bild ${activeIndex + 1} von ${imageWorld.length}`}
+            aria-label={`Vollansicht Bild ${shownIndex + 1} von ${imageWorld.length}`}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            animate={{ opacity: activeIndex !== null ? 1 : 0 }}
             transition={{ duration: reduceMotion ? 0 : 0.32, ease: premiumEase }}
+            style={{ pointerEvents: activeIndex !== null ? undefined : "none" }}
             onMouseDown={(event) => {
               if (event.target === event.currentTarget) closeLightbox();
             }}
@@ -273,26 +234,23 @@ export function UrsulaImageWorld() {
               <ArrowIcon direction="previous" />
             </button>
 
-            <AnimatePresence mode="wait">
-              <motion.figure
-                key={imageWorld[activeIndex].src}
-                initial={reduceMotion ? false : { opacity: 0, scale: 0.985 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={reduceMotion ? undefined : { opacity: 0, scale: 0.99 }}
-                transition={{ duration: reduceMotion ? 0 : 0.45, ease: premiumEase }}
-                className="relative h-[74svh] w-[88vw] sm:h-[86svh] sm:w-[82vw]"
-              >
-                <Image
-                  src={imageWorld[activeIndex].src}
-                  alt={imageWorld[activeIndex].alt}
-                  fill
-                  unoptimized
-                  loading="eager"
-                  sizes="90vw"
-                  className="object-contain drop-shadow-[0_26px_70px_rgba(0,0,0,0.32)]"
-                />
-              </motion.figure>
-            </AnimatePresence>
+            <motion.figure
+              key={imageWorld[shownIndex].src}
+              initial={reduceMotion ? false : { opacity: 0, scale: 0.985 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: reduceMotion ? 0 : 0.45, ease: premiumEase }}
+              className="relative h-[74svh] w-[88vw] sm:h-[86svh] sm:w-[82vw]"
+            >
+              <Image
+                src={imageWorld[shownIndex].src}
+                alt={imageWorld[shownIndex].alt}
+                fill
+                unoptimized
+                loading="eager"
+                sizes="90vw"
+                className="object-contain drop-shadow-[0_26px_70px_rgba(0,0,0,0.32)]"
+              />
+            </motion.figure>
 
             <button
               type="button"
@@ -304,11 +262,11 @@ export function UrsulaImageWorld() {
             </button>
 
             <p aria-live="polite" className="absolute bottom-[1.15rem] left-1/2 -translate-x-1/2 text-[0.68rem] font-medium tracking-[0.2em] text-white/60 sm:bottom-6">
-              {String(activeIndex + 1).padStart(2, "0")} / {String(imageWorld.length).padStart(2, "0")}
+              {String(shownIndex + 1).padStart(2, "0")} / {String(imageWorld.length).padStart(2, "0")}
             </p>
           </motion.div>
         )}
-      </AnimatePresence>
+      </Presence>
     </main>
   );
 }

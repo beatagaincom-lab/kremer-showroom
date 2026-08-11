@@ -3,8 +3,14 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { Check, Columns2, Eye, RotateCcw, X } from "lucide-react";
+import {
+  CommentDrawer,
+  type CommentTarget,
+} from "@/components/comments/comment-thread";
+import { Presence, useLastPresent } from "@/components/presence";
+import { useProductComments } from "@/components/comments/use-comments";
 import { contacts } from "@/data/catalog";
 import { copyText, loadSelections, loadStudioConfiguration, saveSelections } from "@/lib/client-storage";
 import type { Product, Selection, ShowroomBundle, StudioConfiguration, Variant } from "@/types/catalog";
@@ -43,6 +49,10 @@ export function ShowroomExperience({ bundle, previewMode = false }: ShowroomExpe
   const [compareOpen, setCompareOpen] = useState(false);
   const [material, setMaterial] = useState<{ product: Product; variant: Variant } | null>(null);
   const [notice, setNotice] = useState("");
+  const [commentTarget, setCommentTarget] = useState<CommentTarget | null>(null);
+  const feedback = useProductComments(bundle.showroom.slug);
+  const shownMaterial = useLastPresent(material);
+  const shownNotice = useLastPresent(notice || null);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       bundle.products.map((product) => [
@@ -180,9 +190,16 @@ export function ShowroomExperience({ bundle, previewMode = false }: ShowroomExpe
               isSaved={isSaved}
               showPrices={showroom.showPrices}
               materialEnabled={showroom.sections.materialDetails}
+              commentCount={feedback.countByItem.get(product.id) ?? 0}
               onVariantChange={(variantIdValue) => setSelectedVariants((current) => ({ ...current, [product.id]: variantIdValue }))}
               onToggleSelection={() => toggleSelection(product)}
               onOpenMaterial={(variant) => setMaterial({ product, variant })}
+              onOpenComments={() => setCommentTarget({
+                itemId: product.id,
+                itemLabel: `${product.name} · ${product.collection}`,
+                label: product.name,
+                sublabel: product.collection,
+              })}
             />
           );
         })}
@@ -203,24 +220,50 @@ export function ShowroomExperience({ bundle, previewMode = false }: ShowroomExpe
         onPrint={() => window.print()}
       />
 
-      <AnimatePresence>
-        {selections.length > 0 ? (
-          <motion.div initial={{ y: 90 }} animate={{ y: 0 }} exit={{ y: 90 }} className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/97 shadow-[0_-12px_35px_rgba(37,41,45,.08)] backdrop-blur-md print:hidden">
-            <div className="site-gutter flex min-h-16 items-center justify-between gap-4">
-              <p className="text-sm font-semibold">{selections.length} {selections.length === 1 ? "Variante ausgewählt" : "Varianten ausgewählt"}</p>
-              <div className="flex items-center gap-1 sm:gap-4">
-                <a href="#auswahl" className="button-quiet hidden sm:inline-flex">Auswahl ansehen</a>
-                {showroom.sections.comparison ? <button type="button" className="button-quiet" onClick={openCompare}><Columns2 aria-hidden size={16} /> <span className="hidden sm:inline">Vergleichen</span></button> : null}
-                <button type="button" className="button-quiet text-sky-strong" onClick={() => setSelections([])}><RotateCcw aria-hidden size={16} /> <span className="hidden sm:inline">Zurücksetzen</span></button>
-              </div>
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      <CommentDrawer
+        target={commentTarget}
+        comments={commentTarget ? feedback.commentsFor(commentTarget.itemId) : []}
+        status={feedback.status}
+        onClose={() => setCommentTarget(null)}
+        onSubmit={async (author, body) => {
+          if (!commentTarget) return;
+          await feedback.submit({
+            itemId: commentTarget.itemId,
+            itemLabel: commentTarget.itemLabel ?? null,
+            author,
+            body,
+          });
+        }}
+      />
 
-      <AnimatePresence>
-        {compareOpen ? (
-          <motion.div className="fixed inset-0 z-[70] bg-white" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-modal="true" aria-labelledby="compare-title">
+      <Presence open={selections.length > 0}>
+        <motion.div
+          initial={{ y: 90 }}
+          animate={{ y: selections.length > 0 ? 0 : 90 }}
+          style={{ pointerEvents: selections.length > 0 ? undefined : "none" }}
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/97 shadow-[0_-12px_35px_rgba(37,41,45,.08)] backdrop-blur-md print:hidden"
+        >
+          <div className="site-gutter flex min-h-16 items-center justify-between gap-4">
+            <p className="text-sm font-semibold">{selections.length} {selections.length === 1 ? "Variante ausgewählt" : "Varianten ausgewählt"}</p>
+            <div className="flex items-center gap-1 sm:gap-4">
+              <a href="#auswahl" className="button-quiet hidden sm:inline-flex">Auswahl ansehen</a>
+              {showroom.sections.comparison ? <button type="button" className="button-quiet" onClick={openCompare}><Columns2 aria-hidden size={16} /> <span className="hidden sm:inline">Vergleichen</span></button> : null}
+              <button type="button" className="button-quiet text-sky-strong" onClick={() => setSelections([])}><RotateCcw aria-hidden size={16} /> <span className="hidden sm:inline">Zurücksetzen</span></button>
+            </div>
+          </div>
+        </motion.div>
+      </Presence>
+
+      <Presence open={compareOpen}>
+        <motion.div
+            className="fixed inset-0 z-[70] bg-white"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: compareOpen ? 1 : 0 }}
+            style={{ pointerEvents: compareOpen ? undefined : "none" }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="compare-title"
+          >
             <div className="site-gutter flex h-full flex-col py-6 md:py-10">
               <div className="flex items-center justify-between border-b border-line pb-5">
                 <div>
@@ -250,35 +293,48 @@ export function ShowroomExperience({ bundle, previewMode = false }: ShowroomExpe
                 })}
               </div>
             </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+        </motion.div>
+      </Presence>
 
-      <AnimatePresence>
-        {material ? (
-          <motion.div className="fixed inset-0 z-[80] grid bg-graphite/95 text-white lg:grid-cols-[65%_35%]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-modal="true" aria-labelledby="material-title">
+      <Presence open={material !== null}>
+        {shownMaterial ? (
+          <motion.div
+            className="fixed inset-0 z-[80] grid bg-graphite/95 text-white lg:grid-cols-[65%_35%]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: material ? 1 : 0 }}
+            style={{ pointerEvents: material ? undefined : "none" }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="material-title"
+          >
             <div className="relative min-h-[58svh] overflow-hidden">
-              <Image src={material.variant.textureImage} alt={`Materialstruktur ${material.variant.colorName}`} fill sizes="(max-width: 1024px) 100vw, 65vw" className="object-cover" style={{ filter: material.variant.imageFilter }} />
+              <Image src={shownMaterial.variant.textureImage} alt={`Materialstruktur ${shownMaterial.variant.colorName}`} fill sizes="(max-width: 1024px) 100vw, 65vw" className="object-cover" style={{ filter: shownMaterial.variant.imageFilter }} />
             </div>
             <div className="relative flex flex-col justify-center p-7 md:p-12">
               <button type="button" onClick={() => setMaterial(null)} className="absolute right-5 top-5 flex h-12 w-12 items-center justify-center border border-white/30" aria-label="Materialansicht schliessen"><X aria-hidden /></button>
               <Eye aria-hidden className="mb-6 text-sky" />
-              <h2 id="material-title" className="font-serif text-5xl">{material.product.name}</h2>
-              <p className="mt-3 text-lg text-white/70">{material.variant.colorName} · {material.variant.sku}</p>
+              <h2 id="material-title" className="font-serif text-5xl">{shownMaterial.product.name}</h2>
+              <p className="mt-3 text-lg text-white/70">{shownMaterial.variant.colorName} · {shownMaterial.variant.sku}</p>
               <p className="mt-8 max-w-md leading-7 text-white/70">Die vergrösserte Ansicht dient der visuellen Orientierung. Verbindliche Materialangaben werden aus dem Produktstamm übernommen.</p>
               <button type="button" className="button-primary mt-8 self-start" onClick={() => setMaterial(null)}>Ansicht schliessen</button>
             </div>
           </motion.div>
         ) : null}
-      </AnimatePresence>
+      </Presence>
 
-      <AnimatePresence>
-        {notice ? (
-          <motion.div className="fixed bottom-24 left-1/2 z-[90] flex -translate-x-1/2 items-center gap-2 border border-line bg-white px-5 py-3 text-sm shadow-[var(--shadow-soft)] print:hidden" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} role="status">
-            <Check aria-hidden size={16} className="text-sky-strong" /> {notice}
+      <Presence open={!!notice}>
+        {shownNotice ? (
+          <motion.div
+            className="fixed bottom-24 left-1/2 z-[90] flex -translate-x-1/2 items-center gap-2 border border-line bg-white px-5 py-3 text-sm shadow-[var(--shadow-soft)] print:hidden"
+            initial={{ opacity: 0, y: 12 }}
+            animate={notice ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+            style={{ pointerEvents: notice ? undefined : "none" }}
+            role="status"
+          >
+            <Check aria-hidden size={16} className="text-sky-strong" /> {shownNotice}
           </motion.div>
         ) : null}
-      </AnimatePresence>
+      </Presence>
     </main>
   );
 }

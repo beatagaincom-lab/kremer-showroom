@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { FixleintuecherShowroom } from "@/components/showroom/fixleintuecher-showroom";
+import { ImageWorld } from "@/components/showroom/image-world";
 import { ShowroomExperience } from "@/components/showroom/showroom-experience";
-import { UrsulaImageWorld } from "@/components/showroom/ursula-image-world";
-import { FIXLEINTUECHER_SLUG, URSULA_IMAGE_WORLD_SLUG } from "@/data/fixleintuecher";
+import {
+  FIXLEINTUECHER_SLUG,
+  IMAGE_WORLD_SLUG,
+  LEGACY_IMAGE_WORLD_SLUG,
+} from "@/data/fixleintuecher";
 import { catalogRepository } from "@/lib/catalog-repository";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -13,13 +17,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (slug === FIXLEINTUECHER_SLUG) {
     return {
       title: "Fixleintücher in 32 Farben",
-      description: "Die vollständige KREMER Farbkollektion für Fixleintücher und Spannbettlaken.",
+      description: "Die vollständige KREMER Farbkollektion für Fixleintücher und Spannbettlaken – mit Kommentaren direkt am Produkt.",
     };
   }
-  if (slug === URSULA_IMAGE_WORLD_SLUG) {
+  if (slug === IMAGE_WORLD_SLUG) {
     return {
-      title: "Bildwelt Fixleintücher",
-      description: "Eine reduzierte Bildpräsentation der Fixleintücher-Kollektion.",
+      title: "Beispiele & Bildwelt",
+      description: "Eine erste Auswahl an Beispielen für die Bildsprache der Fixleintücher-Kollektion – auf Wunsch zeigen wir mehr.",
     };
   }
   const bundle = await catalogRepository.getShowroomBySlug(slug);
@@ -31,7 +35,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ShowroomPage({ params }: PageProps) {
   const { slug } = await params;
   if (slug === FIXLEINTUECHER_SLUG) return <FixleintuecherShowroom />;
-  if (slug === URSULA_IMAGE_WORLD_SLUG) return <UrsulaImageWorld />;
+  if (slug === IMAGE_WORLD_SLUG) return <ImageWorld />;
+  if (slug === LEGACY_IMAGE_WORLD_SLUG) permanentRedirect(`/showroom/${IMAGE_WORLD_SLUG}`);
   const bundle = await catalogRepository.getShowroomBySlug(slug);
   if (!bundle) notFound();
   return <ShowroomExperience bundle={bundle} />;
